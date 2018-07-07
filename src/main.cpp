@@ -13,12 +13,18 @@ extern "C" {
 #include <Wire.h>
 #include <stdio.h>
 #include <string.h>
+#include "main.h"
 #include "driver/gpio.h"
 #include "driver/mcpwm.h"
 #include "pinmux/pinmux.h"
 #include "motion/control.h"
 #include "motion/pid/PID.h"
 #include "motion/encoder/encoder.h"
+#include "comm/UDP/udp_server.h"
+
+//inter-task communication queue
+char buffer[255];
+QueueHandle_t gQueue = xQueueCreate(1, sizeof(buffer));
 
 /**
   * @brief Main App Entry point
@@ -34,10 +40,14 @@ void setup()
   pinMode (GPIO_NUM_27, OUTPUT);
   pinMode (GPIO_NUM_33, OUTPUT);
 
-  //I2C Init
-  Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
+  if(gQueue == NULL){
+    Serial.println("Error creating the queue");
+  }
 
-  xTaskCreate(&control, "control", configMINIMAL_STACK_SIZE+1024, NULL, 10, NULL);
+  delay(1000);
+
+  xTaskCreate(&control, "control", configMINIMAL_STACK_SIZE+8192, NULL, 255, NULL);
+  xTaskCreate(&udpServer, "UDP_Server", configMINIMAL_STACK_SIZE+8192, NULL, 10, NULL);
 }
 
 void loop()

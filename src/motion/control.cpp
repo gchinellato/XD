@@ -16,6 +16,7 @@
 #include "pid/PID.h"
 #include "motion/motor/motor.h"
 #include "motion/encoder/encoder.h"
+#include "../main.h"
 
 //PID objects
 PID speedPID;
@@ -75,6 +76,9 @@ void setConfiguration(Configuration *configuration)
 
 void control(void *pvParameter)
 { 
+  //I2C Init
+  Wire.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
+  
   vTaskDelay(50);
   float dt=0;
   unsigned long timestamp=0;
@@ -83,7 +87,7 @@ void control(void *pvParameter)
   float speedPIDInput, anglePIDInput;
   float speedPIDOutput, anglePIDOutput;
   boolean started = true;
-  //GY80 imu;
+  char receivedBuffer[255];
   MPU9250 myIMU;
   byte c = myIMU.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
   myIMU.initMPU9250();
@@ -104,11 +108,18 @@ void control(void *pvParameter)
       dt = (float)(timestamp - timestamp_old)/1000.0f; 
       timestamp_old = timestamp;
 
-      //getEvent()
+      //getEvent
+      xQueueReceive(gQueue, &receivedBuffer, portMAX_DELAY);
+      
+      Serial.print("Reading:");
+      for(int i=0; i < 255; i++){
+        Serial.print(receivedBuffer[i]);
+        if(receivedBuffer[i] == '#')
+            break;
+      }
 
-      //ori = imu.getOrientation(1, dt);
       ori = myIMU.getOrientation(1, dt);
-      Serial.println("dt: " + String(dt) + ", Roll: " + String(ori[0]) + ", Pitch: " + String(ori[1]) + ", Yaw: " + String(ori[2]));
+      //Serial.println("dt: " + String(dt) + ", Roll: " + String(ori[0]) + ", Pitch: " + String(ori[1]) + ", Yaw: " + String(ori[2]));
       anglePIDInput = ori[1];
 
       //getSpeed();
