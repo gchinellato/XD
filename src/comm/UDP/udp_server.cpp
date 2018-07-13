@@ -12,8 +12,8 @@
 #include "../../main.h"
 
 int status = WL_IDLE_STATUS;
-char ssid[] = "vai_curintia-2.4GHz"; //  your network SSID (name)
-char pass[] = "coloradovelters722";    // your network password (use for WPA, or use as key for WEP)
+char ssid[] = "TP-LINK_533A6C"; //  your network SSID (name)
+char pass[] = "00533A6C";    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
 unsigned int localPort = 5000;      // local port to listen on
@@ -75,8 +75,8 @@ void udpServer(void *pvParameter){
             if (len > 0) {
                 packetBuffer[len] = 0;
             }
-            Serial.print("Contents:");
-            Serial.println(packetBuffer);
+            //Serial.print("Contents:");
+            //Serial.println(packetBuffer);
 
             xQueueSend(gQueue, &packetBuffer, portMAX_DELAY);
         }

@@ -81,6 +81,9 @@ void control(void *pvParameter)
   
   vTaskDelay(50);
   float dt=0;
+  int command = 0;
+  int size; 
+  char *ret;
   unsigned long timestamp=0;
   unsigned long timestamp_old=0;
   float *ori;
@@ -109,13 +112,63 @@ void control(void *pvParameter)
       timestamp_old = timestamp;
 
       //getEvent
-      xQueueReceive(gQueue, &receivedBuffer, portMAX_DELAY);
-      
-      Serial.print("Reading:");
-      for(int i=0; i < 255; i++){
-        Serial.print(receivedBuffer[i]);
-        if(receivedBuffer[i] == '#')
-            break;
+      if(uxQueueMessagesWaiting(gQueue)){
+        xQueueReceive(gQueue, &receivedBuffer, portMAX_DELAY);
+        
+        Serial.print("Reading:");
+        for(int i=0; i < 255; i++){
+            Serial.print(receivedBuffer[i]);
+            if(receivedBuffer[i] == '#')
+                break;
+        }
+        Serial.print("\n");
+
+        //split string into tokens
+        ret = strtok(receivedBuffer, ",");
+
+        //get command
+        command = atoi(ret);
+
+        //get number of parameters
+        //size = int(strtok(NULL, ","));
+
+        switch (command) {
+            case STARTED:
+                started = atoi(strtok(NULL, ","));
+                Serial.println("STARTED command: " + String(started));
+                break;
+            case DIRECTION:
+                userControl.direction = atof(strtok(NULL, ","));
+                userControl.direction /= 10;
+                Serial.println("DIRECTION command: " + String(userControl.direction));
+                break;
+            case STEERING:
+                userControl.steering = atof(strtok(NULL, ","));
+                userControl.steering /= 10;
+                Serial.println("STEERING command: " + String(userControl.steering));
+                break;
+            case ANGLE_PID_CONS:
+                configuration.anglePIDConKp = atof(strtok(NULL, ","));
+                configuration.anglePIDConKi = atof(strtok(NULL, ","));
+                configuration.anglePIDConKd = atof(strtok(NULL, ","));
+                configuration.calibratedZeroAngle = atof(strtok(NULL, ","));
+                configuration.anglePIDLowerLimit = atof(strtok(NULL, ","));
+                Serial.println("ANGLE_PID_CONS command: " + String(configuration.anglePIDConKp) +","+ String(configuration.anglePIDConKi) +","+ String(configuration.anglePIDConKd));
+                Serial.println("ZERO_ANGLE command: " + String(configuration.calibratedZeroAngle));
+                Serial.println("ANGLE_LIMITE command: " + String(configuration.anglePIDLowerLimit));
+                break;
+            case ZERO_ANGLE:
+                configuration.calibratedZeroAngle = atof(strtok(NULL, ","));
+                Serial.println("ZERO_ANGLE command: " + String(configuration.calibratedZeroAngle));
+                break;
+            case ANGLE_LIMITE:
+                configuration.anglePIDLowerLimit = atof(strtok(NULL, ","));
+                Serial.println("ANGLE_LIMITE command: " + String(configuration.anglePIDLowerLimit));
+                break;
+            default:
+                Serial.println("Unknown command");
+                break;
+        }
       }
 
       ori = myIMU.getOrientation(1, dt);
@@ -123,17 +176,17 @@ void control(void *pvParameter)
       anglePIDInput = ori[1];
 
       //getSpeed();
-      motor1.motorSpeed = (float)(encoder1.ticks - encoder1.lastTicks);
-      encoder1.lastTicks = encoder1.ticks;
-      motor2.motorSpeed = (float)(encoder2.ticks - encoder2.lastTicks);
-      encoder2.lastTicks = encoder2.ticks;
+      //motor1.motorSpeed = (float)(encoder1.ticks - encoder1.lastTicks);
+      //encoder1.lastTicks = encoder1.ticks;
+      //motor2.motorSpeed = (float)(encoder2.ticks - encoder2.lastTicks);
+      //encoder2.lastTicks = encoder2.ticks;
 
       //Set angle setpoint and compensate to reach equilibrium point
       anglePID.setSetpoint(userControl.direction+configuration.calibratedZeroAngle);
       anglePID.setTunings(configuration.anglePIDConKp, configuration.anglePIDConKi, configuration.anglePIDConKd);
       //Compute Angle PID (input is current angle)
       anglePIDOutput = anglePID.compute(anglePIDInput);
-      //Serial.println("anglePIDoutput: " + String(anglePIDOutput));
+      Serial.println("anglePIDoutput: " + String(anglePIDOutput));
 
       //Set PWM value
       if (started && (abs(anglePIDInput) < ANGLE_IRRECOVERABLE)) {
