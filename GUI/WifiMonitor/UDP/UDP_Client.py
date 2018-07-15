@@ -21,7 +21,7 @@ else:
 from Utils.traces.trace import *
 
 class UDP_ClientThread(threading.Thread):
-    def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, queue=queue.Queue(), debug=0, UDP_IP="192.168.1.35", UDP_PORT=5000):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, queue=queue.Queue(), debug=0, UDP_IP="192.168.0.101", UDP_PORT=5001):
         threading.Thread.__init__(self, group=group, target=target, name=name)
         self.args = args
         self.kwargs = kwargs

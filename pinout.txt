@@ -9,7 +9,7 @@ MOTOR_B			GPIO_NUM_26 // saida analogica
 MOTOR_A_REV 	GPIO_NUM_33
 MOTOR_B_REV 	GPIO_NUM_27
 
-THROTTLE		GPIO_NUM_13 // entrada analogica
+THROTTLE		GPIO_NUM_34 // entrada analogica
 
 UART_RX1		GPIO_NUM_16
 UART_TX1		GPIO_NUM_17

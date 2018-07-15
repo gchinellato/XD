@@ -8,6 +8,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-extern QueueHandle_t gQueue;
+extern QueueHandle_t gQueueEvent;
+extern QueueHandle_t gQueueReply;
 
 #endif

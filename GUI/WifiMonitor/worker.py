@@ -48,7 +48,14 @@ class Worker(QtCore.QThread):
             msg = self.parent.serverUDP.getMessage()
 
             #[(Thread)][(module),(data1),(data2),(data3),(...)(#)]
-            print(msg)
+            #print(msg)
+            if msg[1][0] != None:
+                self.pitch = msg[1][0]
+                self.parent.ui.lineEdit_pitch.setText(self.pitch)
+                self.parent.ui.lineEdit_pitch_tab_PID.setText(self.pitch)
+            if msg[1][1] != None:
+                self.outputPIDAngle = msg[1][1]
+                self.parent.ui.lineEdit_pid_out_angle.setText(self.outputPIDAngle)
             if msg[0] == SERVER_UDP_NAME:
                 if msg[1][0] == CMD_SERIAL:
                     '''self.timestamp = msg[1][1]
@@ -70,7 +77,7 @@ class Worker(QtCore.QThread):
                     self.steering = msg[1][17]
                     '''
 
-                    self.timestamp = msg[1][1]
+                    '''self.timestamp = msg[1][1]
                     self.dt = msg[1][2]
                     self.roll = msg[1][3]
                     self.pitch = msg[1][4]
@@ -78,22 +85,22 @@ class Worker(QtCore.QThread):
                     self.setpointPIDAngle = msg[1][6]                        
                     self.outputPIDAngle = msg[1][7]
                     self.direction = msg[1][8]
-                    self.steering = msg[1][9]
+                    self.steering = msg[1][9]'''
 
-                    self.parent.ui.lineEdit_timestamp.setText(self.timestamp)
+                    '''self.parent.ui.lineEdit_timestamp.setText(self.timestamp)
                     self.parent.ui.lineEdit_dt.setText(self.setpointPIDAngle)
                     self.parent.ui.lineEdit_roll.setText(self.roll)
                     self.parent.ui.lineEdit_pitch.setText(self.pitch)
                     self.parent.ui.lineEdit_pitch_tab_PID.setText(self.pitch)
                     self.parent.ui.lineEdit_yaw.setText(self.yaw)
-                    '''self.parent.ui.lineEdit_distanceA.setText(self.distance1)
+                    self.parent.ui.lineEdit_distanceA.setText(self.distance1)
                     self.parent.ui.lineEdit_distanceB.setText(self.distance2)
                     self.parent.ui.lineEdit_velocA.setText(self.velocity1)
                     self.parent.ui.lineEdit_velocB.setText(self.velocity2)
-                    self.parent.ui.lineEdit_pid_out_speed.setText(self.outputPIDSpeed)'''
+                    self.parent.ui.lineEdit_pid_out_speed.setText(self.outputPIDSpeed)
                     self.parent.ui.lineEdit_pid_out_angle.setText(self.outputPIDAngle)
                     self.parent.ui.lineEdit_direction.setText(self.direction)
-                    self.parent.ui.lineEdit_steering.setText(self.steering)
+                    self.parent.ui.lineEdit_steering.setText(self.steering)'''
 
                 if msg[1][0] == CMD_PAN_TILT:
                     self.panTiltV = msg[1][1]

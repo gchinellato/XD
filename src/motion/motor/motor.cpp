@@ -28,13 +28,27 @@ Motor::Motor(dac_channel_t channel, gpio_num_t revPin)
 void Motor::motorGo(int direct, float voltage)
 {
     // Set inA
-      if (direct <= CW)
+    if (direct <= CW)
+    {
+        //93
+        voltage = abs(VOLTAGE_MIN+voltage);
         digitalWrite(reversePin, HIGH);
-      else
+    }
+    else
+    {
+        //101
+        voltage = abs(VOLTAGE_MIN+8+voltage);
         digitalWrite(reversePin, LOW);
+    }
+
+    if(voltage > 255)
+    {
+        voltage = VOLTAGE_MAX;
+    }
 
     dac_out_voltage(dac_num, abs(voltage));
 }
+
 /* set speed in percentage from -100 to 100 */
 void Motor::setSpeedPercentage(float speed)
 {
@@ -58,7 +72,7 @@ void Motor::setSpeedPercentage(float speed)
 
 void Motor::motorOff()
 {
-
+    dac_out_voltage(dac_num, abs(0));
 }
 
 void Motor::currentSense()

@@ -499,31 +499,32 @@ float* MPU9250::getOrientation(int algorithm, float G_dt)
         gy = (float)gyroCount[1]*gRes;
         gz = (float)gyroCount[2]*gRes;
 
-        readMagData(magCount);  // Read the x/y/z adc values
-        getMres();
+        //readMagData(magCount);  // Read the x/y/z adc values
+        //getMres();
         // User environmental x-axis correction in milliGauss, should be
         // automatically calculated
-        magbias[0] = +470.;
+        //magbias[0] = +470.;
         // User environmental x-axis correction in milliGauss TODO axis??
-        magbias[1] = +120.;
+        //magbias[1] = +120.;
         // User environmental x-axis correction in milliGauss
-        magbias[2] = +125.;
+        //magbias[2] = +125.;
 
         // Calculate the magnetometer values in milliGauss
         // Include factory calibration per data sheet and user environmental
         // corrections
         // Get actual magnetometer value, this depends on scale being set
-        mx = (float)magCount[0]*mRes*magCalibration[0] -
-                   magbias[0];
-        my = (float)magCount[1]*mRes*magCalibration[1] -
-                   magbias[1];
-        mz = (float)magCount[2]*mRes*magCalibration[2] -
-                   magbias[2];
+        //mx = (float)magCount[0]*mRes*magCalibration[0] -
+        //           magbias[0];
+        //my = (float)magCount[1]*mRes*magCalibration[1] -
+        //           magbias[1];
+        //mz = (float)magCount[2]*mRes*magCalibration[2] -
+        //           magbias[2];
     } // if (readBytePU9250_ADDRESS, INT_STATUS) & 0x01)
 
-    orientation[0] = CF*(orientation[0] + gx*G_dt) + (1-CF)*(atan2(ay, az))*RAD_TO_DEG;
+    //orientation[0] = CF*(orientation[0] + gx*G_dt) + (1-CF)*(atan2(ay, az))*RAD_TO_DEG;
+    orientation[0] = CF*(orientation[0] + gx*G_dt) + (1-CF)*(atan2(ay, sqrt((ax*ax+az*az))))*RAD_TO_DEG;
     orientation[1] = CF*(orientation[1] + gy*G_dt) + (1-CF)*(atan2(-ax, sqrt((ay*ay+az*az))))*RAD_TO_DEG;
-    orientation[2] = CF*(orientation[2] + gz*G_dt) + (1-CF)*(atan2(my, mx))*RAD_TO_DEG;
+    orientation[2] = 0;//CF*(orientation[2] + gz*G_dt) + (1-CF)*(atan2(my, mx))*RAD_TO_DEG;
 
 	  return orientation;
 }

@@ -16,7 +16,7 @@ char ssid[] = "TP-LINK_533A6C"; //  your network SSID (name)
 char pass[] = "00533A6C";    // your network password (use for WPA, or use as key for WEP)
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
-unsigned int localPort = 5000;      // local port to listen on
+unsigned int localPort = 5001;      // local port to listen on
 
 char packetBuffer[255]; //buffer to hold incoming packet
 char  ReplyBuffer[] = "acknowledged";       // a string to send back
@@ -78,7 +78,7 @@ void udpServer(void *pvParameter){
             //Serial.print("Contents:");
             //Serial.println(packetBuffer);
 
-            xQueueSend(gQueue, &packetBuffer, portMAX_DELAY);
+            xQueueSend(gQueueEvent, &packetBuffer, portMAX_DELAY);
         }
         vTaskDelay(250);
     }

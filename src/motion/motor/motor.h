@@ -16,10 +16,12 @@
 #define BRAKEGND 3
 #define CS_THRESHOLD 100
 
-#define VOLTAGE_MIN 0
-#define VOLTAGE_MAX 3.3
+//(Vin/Vmax)*255
+//(1.2V/3.3V=0.364*255=93)
+#define VOLTAGE_MIN 93 //1.2V
+#define VOLTAGE_MAX 255 //2.0V
 
-#define DEAD_BAND 8
+#define DEAD_BAND 0
 
 class Motor
 {

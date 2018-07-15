@@ -48,7 +48,7 @@ class UDP_ServerThread(threading.Thread):
         #Open socket through UDP/IP
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.UDP_IP, self.UDP_PORT))
-        self.sock.settimeout(2.0)
+        self.sock.settimeout(5.0)
         lastTime = 0.0
 
         while not self._stopEvent.wait(self._sleepPeriod):
@@ -63,6 +63,7 @@ class UDP_ServerThread(threading.Thread):
                 strData, addr = self.sock.recvfrom(128)
                 strData = strData.decode("utf-8")
                 data = self.parseData(strData)
+                print(data)
                 self.putMessage(self.name, data)
             except queue.Full:
                 if (self.debug & MODULE_SERVER_UDP):

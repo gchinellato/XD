@@ -2,8 +2,8 @@
 """
 *************************************************
 * @Project: Self Balance
-*  @Platform: Raspberry PI 3 / Ubuntu / Qt
-* @Description: Manager header file
+* @Platform: Raspberry PI 3
+* @Description: Constants header file
 * @Owner: Guilherme Chinellato
 * @Email: guilhermechinellato@gmail.com
 *************************************************
@@ -17,6 +17,7 @@ PAN_TILT_NAME = "PanTilt-Thread"
 PS3_CTRL_NAME = "PS3-Controller-Thread"
 TRACKING_NAME = "Tracking-Thread"
 SERIAL_NAME = "Serial-Thread"
+LOG_FILE_NAME = "LogFile-Thread"
 
 #Commands
 CMD_BALANCE = "BALANCE"
@@ -27,29 +28,3 @@ CMD_UDP_CLIENT = "UDP_CLIENT"
 CMD_UDP_SERVER = "UDP_SERVER"
 CMD_SERIAL = "SERIAL"
 CMD_MANAGER = "MANAGER"
-
-STARTED = 0
-DIRECTION = 1
-STEERING = 2
-SPEED_PID = 3
-ANGLE_PID_AGGR = 4
-ANGLE_PID_CONS = 5
-CALIBRATED_ZERO_ANGLE = 6
-ANGLE_LIMIT = 7
-
-#Initial values
-SPEED_SETPOINT	=	0.0
-SPEED_KP 		=	0.0
-SPEED_KI 		=	0.0
-SPEED_KD 		=	0.0
-ANGLE_SETPOINT 	=	0.0
-ANGLE_LIMIT 	=	10.0
-ANGLE_KP_AGGR 	=	0.0
-ANGLE_KI_AGGR 	=	0.0
-ANGLE_KD_AGGR 	=	0.0
-ANGLE_KP_CONS 	=	1.0
-ANGLE_KI_CONS 	=	0.0
-ANGLE_KD_CONS 	=	0.0
-ANGLE_IRRECOVERABLE = 0.0
-CALIBRATED_ZERO_ANGLE = -30.0
-WINDUP_GUARD 		= 100

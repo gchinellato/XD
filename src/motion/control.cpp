@@ -26,37 +26,6 @@ PID anglePID;
 Motor motor1(DAC_CHANNEL_1, MOTOR_A_REV);
 Motor motor2(DAC_CHANNEL_2, MOTOR_B_REV);
 
-//Encoder objects
-Encoder encoder1;
-Encoder encoder2;
-
-/* interrupt functions for counting revolutions in the encoders */
-/* when the callback function is called due an interrup event on pinEncoderAx
- * and pinEncoderBx=true, then is clockwise, if not it is counter-clockwise
- */
-portMUX_TYPE mux1 = portMUX_INITIALIZER_UNLOCKED;
-portMUX_TYPE mux2 = portMUX_INITIALIZER_UNLOCKED;
-
-void encoderISR1()
-{
-    portENTER_CRITICAL(&mux1);
-    if(digitalRead(ENCODERB1_PIN))
-    { encoder1.ticks++; }
-    else
-    { encoder1.ticks--; }
-    portEXIT_CRITICAL(&mux1);
-}
-
-void encoderISR2()
-{
-    portENTER_CRITICAL(&mux2);
-    if(digitalRead(ENCODERB2_PIN))
-    { encoder2.ticks++; }
-    else
-    { encoder2.ticks--; }
-    portEXIT_CRITICAL(&mux2);
-}
-
 void setConfiguration(Configuration *configuration)
 {
     configuration->speedPIDKp = SPEED_KP;
@@ -91,8 +60,8 @@ void control(void *pvParameter)
   float speedPIDOutput, anglePIDOutput;
   boolean started = true;
   char receivedBuffer[255];
+  char sendBuffer[255];
   MPU9250 myIMU;
-  byte c = myIMU.readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
   myIMU.initMPU9250();
 
   UserControl userControl = {0, 0};
@@ -112,17 +81,9 @@ void control(void *pvParameter)
       timestamp_old = timestamp;
 
       //getEvent
-      if(uxQueueMessagesWaiting(gQueue)){
-        xQueueReceive(gQueue, &receivedBuffer, portMAX_DELAY);
+      if(uxQueueMessagesWaiting(gQueueEvent)){
+        xQueueReceive(gQueueEvent, &receivedBuffer, portMAX_DELAY);
         
-        Serial.print("Reading:");
-        for(int i=0; i < 255; i++){
-            Serial.print(receivedBuffer[i]);
-            if(receivedBuffer[i] == '#')
-                break;
-        }
-        Serial.print("\n");
-
         //split string into tokens
         ret = strtok(receivedBuffer, ",");
 
@@ -173,32 +134,54 @@ void control(void *pvParameter)
 
       ori = myIMU.getOrientation(1, dt);
       //Serial.println("dt: " + String(dt) + ", Roll: " + String(ori[0]) + ", Pitch: " + String(ori[1]) + ", Yaw: " + String(ori[2]));
+      //anglePIDInput = -ori[0];
       anglePIDInput = ori[1];
 
-      //getSpeed();
-      //motor1.motorSpeed = (float)(encoder1.ticks - encoder1.lastTicks);
-      //encoder1.lastTicks = encoder1.ticks;
-      //motor2.motorSpeed = (float)(encoder2.ticks - encoder2.lastTicks);
-      //encoder2.lastTicks = encoder2.ticks;
+      //analog input (0V=0 / 3V3=4095)
+      int analog_input = analogRead(ANALOG_INPUT);
+      //Serial.println("Analog Input: " + String(analog_input));
+      //userControl.direction = (float)analog_input/40.95; 
 
       //Set angle setpoint and compensate to reach equilibrium point
-      anglePID.setSetpoint(userControl.direction+configuration.calibratedZeroAngle);
+      anglePID.setSetpoint(configuration.calibratedZeroAngle);
       anglePID.setTunings(configuration.anglePIDConKp, configuration.anglePIDConKi, configuration.anglePIDConKd);
       //Compute Angle PID (input is current angle)
       anglePIDOutput = anglePID.compute(anglePIDInput);
-      Serial.println("anglePIDoutput: " + String(anglePIDOutput));
+      //Serial.println("anglePIDoutput: " + String(anglePIDOutput));
 
-      //Set PWM value
-      if (started && (abs(anglePIDInput) < ANGLE_IRRECOVERABLE)) {
-          motor1.setSpeedPercentage(anglePIDOutput+userControl.steering);
-          motor2.setSpeedPercentage(anglePIDOutput-userControl.steering);
+      //Auto or Manual Mode
+      if (started &&
+          (abs(anglePIDInput) > (abs(CALIBRATED_ZERO_ANGLE)-configuration.anglePIDLowerLimit) && 
+          abs(anglePIDInput) < (abs(CALIBRATED_ZERO_ANGLE)+configuration.anglePIDLowerLimit))) {
+          //compensate dead band
+          if(anglePIDOutput >= 0) {
+              anglePIDOutput += DEAD_BAND;
+          }else {
+              anglePIDOutput -= DEAD_BAND;
+          }
+
+          //max speed - self balance mode
+          int max_speed = 20;
+          if(anglePIDOutput > max_speed) {
+              anglePIDOutput = max_speed;
+          }else if (anglePIDOutput < -max_speed) {
+              anglePIDOutput = -max_speed;
+          }
+
+          Serial.println("Auto Mode: " + String(anglePIDOutput));
+          motor1.setSpeedPercentage(anglePIDOutput);
+          motor2.setSpeedPercentage(anglePIDOutput);
       }
       else {
-          motor1.motorOff();
-          motor2.motorOff();
+          Serial.println("Manual Mode: " + String(userControl.direction));
+          motor1.setSpeedPercentage(userControl.direction);
+          motor2.setSpeedPercentage(userControl.direction);
       }
 
-      //notify();
+      //notify
+      sprintf(sendBuffer, "%0.2f,", anglePIDInput);
+      sprintf(sendBuffer, "%s%0.2f#", sendBuffer, anglePIDOutput);
+      xQueueSend(gQueueReply, &sendBuffer, 10);
     }
     vTaskDelay(DATA_INTERVAL / portTICK_RATE_MS); 
   }
