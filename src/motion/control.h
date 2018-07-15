@@ -8,7 +8,7 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#define DATA_INTERVAL 	    5 // ms
+#define DATA_INTERVAL 	    10 // ms
 
 enum cmd{
 	STARTED = 0,

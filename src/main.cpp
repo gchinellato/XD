@@ -38,8 +38,9 @@ void setup()
   Serial.setTimeout(10);
   while(!Serial) {}
 
-  //motor reverse
-  pinMode (GPIO_NUM_27, OUTPUT);
+  //motor reverse input
+  pinMode (GPIO_NUM_27, INPUT);
+  //motor reverse output
   pinMode (GPIO_NUM_33, OUTPUT);
 
   if(gQueueEvent == NULL || gQueueReply == NULL){

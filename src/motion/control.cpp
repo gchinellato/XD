@@ -140,7 +140,7 @@ void control(void *pvParameter)
       //analog input (0V=0 / 3V3=4095)
       int analog_input = analogRead(ANALOG_INPUT);
       //Serial.println("Analog Input: " + String(analog_input));
-      //userControl.direction = (float)analog_input/40.95; 
+      userControl.direction = (float) (analog_input/40.95) - (675/40.95); 
 
       //Set angle setpoint and compensate to reach equilibrium point
       anglePID.setSetpoint(configuration.calibratedZeroAngle);
@@ -168,11 +168,15 @@ void control(void *pvParameter)
               anglePIDOutput = -max_speed;
           }
 
-          Serial.println("Auto Mode: " + String(anglePIDOutput));
+          //Serial.println("Auto Mode: " + String(anglePIDOutput));
           motor1.setSpeedPercentage(anglePIDOutput);
           motor2.setSpeedPercentage(anglePIDOutput);
       }
       else {
+          if(digitalRead(GPIO_NUM_27)){
+              userControl.direction = -userControl.direction;
+          }
+
           Serial.println("Manual Mode: " + String(userControl.direction));
           motor1.setSpeedPercentage(userControl.direction);
           motor2.setSpeedPercentage(userControl.direction);
