@@ -7,4 +7,6 @@ In 2018, "Instituto Maua de Tecnologia" was awarded with the title referred to s
 
 https://pacepartners.org/
 
-![Screenshot](xd.png)
+<p align="center">
+  <img src="https://github.com/gchinellato/XD/blob/master/xd.png?raw=true" alt="XD"/>
+</p>
