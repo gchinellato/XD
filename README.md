@@ -7,4 +7,4 @@ In 2018, "Instituto Maua de Tecnologia" was awarded with the title referred to s
 
 https://pacepartners.org/
 
-![Screenshot](XD.png)
+![Screenshot](xd.png)
